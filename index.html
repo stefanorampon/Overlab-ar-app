@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EUROSAB - Configuratore AR Lastre</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        /* Pannello controlli */
+        .controls-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            padding: 15px;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -2px 20px rgba(0,0,0,0.3);
+        }
+        
+        .layer-control {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+        
+        .toggle-btn {
+            width: 50px;
+            height: 26px;
+            background: #ddd;
+            border-radius: 13px;
+            margin-right: 15px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle-btn.active {
+            background: #2ecc71;
+        }
+        
+        .toggle-btn::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s;
+        }
+        
+        .toggle-btn.active::after {
+            transform: translateX(24px);
+        }
+        
+        .intensity-slider {
+            flex: 1;
+            margin: 0 15px;
+        }
+        
+        .color-picker {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        
+        .instructions {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Scena AR -->
+    <a-scene 
+        embedded 
+        arjs="sourceType: webcam; debugUIEnabled: false;"
+        vr-mode-ui="enabled: false"
+        renderer="logarithmicDepthBuffer: true;"
+    >
+        <!-- Marker per lastra -->
+        <a-marker 
+            type="pattern" 
+            url="assets/markers/eurosab-marker.patt"
+            emitevents="true" 
+            cursor="fuse: false;"
+            id="lastra-marker"
+        >
+            <!-- Lastra Base -->
+            <a-plane 
+                id="base-layer"
+                width="1.0" 
+                height="0.6" 
+                position="0 0 0"
+                material="src: #base-texture; transparent: false"
+            ></a-plane>
+            
+            <!-- Layer Sabbiatura -->
+            <a-plane 
+                id="sabbiatura-layer"
+                width="1.0" 
+                height="0.6" 
+                position="0 0 0.001"
+                material="src: #sabbiatura-texture; transparent: true; opacity: 0"
+            ></a-plane>
+            
+            <!-- Layer Smaltatura -->
+            <a-plane 
+                id="smaltatura-layer"
+                width="1.0" 
+                height="0.6" 
+                position="0 0 0.002"
+                material="src: #smaltatura-texture; transparent: true; opacity: 0"
+            ></a-plane>
+            
+            <!-- Layer Colore -->
+            <a-plane 
+                id="colore-layer"
+                width="1.0" 
+                height="0.6" 
+                position="0 0 0.003"
+                material="shader: flat; color: #FF0000; transparent: true; opacity: 0"
+            ></a-plane>
+        </a-marker>
+        
+        <!-- Camera -->
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <!-- Istruzioni -->
+    <div class="instructions" id="instructions">
+        📷 Inquadra il marker per vedere la lastra in AR
+    </div>
+
+    <!-- Pannello Controlli -->
+    <div class="controls-panel">
+        <!-- Controllo Sabbiatura -->
+        <div class="layer-control">
+            <div class="toggle-btn" onclick="toggleLayer('sabbiatura')"></div>
+            <span>🔹 Sabbiatura</span>
+            <input type="range" min="0" max="100" value="50" class="intensity-slider" 
+                   oninput="updateIntensity('sabbiatura', this.value)">
+            <span id="sabbiatura-value">50%</span>
+        </div>
+        
+        <!-- Controllo Smaltatura -->
+        <div class="layer-control">
+            <div class="toggle-btn" onclick="toggleLayer('smaltatura')"></div>
+            <span>✨ Smaltatura</span>
+            <input type="range" min="0" max="100" value="70" class="intensity-slider" 
+                   oninput="updateIntensity('smaltatura', this.value)">
+            <span id="smaltatura-value">70%</span>
+        </div>
+        
+        <!-- Controllo Colore -->
+        <div class="layer-control">
+            <div class="toggle-btn" onclick="toggleLayer('colore')"></div>
+            <span>🎨 Colore</span>
+            <input type="color" class="color-picker" value="#FF0000" 
+                   onchange="updateColor(this.value)">
+            <input type="range" min="0" max="100" value="40" class="intensity-slider" 
+                   oninput="updateIntensity('colore', this.value)">
+            <span id="colore-value">40%</span>
+        </div>
+        
+        <!-- Azioni -->
+        <div style="text-align: center; margin-top: 15px;">
+            <button onclick="saveConfiguration()" style="padding: 10px 20px; margin: 0 5px;">
+                💾 Salva Config
+            </button>
+            <button onclick="resetAll()" style="padding: 10px 20px; margin: 0 5px;">
+                🔄 Reset
+            </button>
+        </div>
+    </div>
+
+    <!-- Assets Textures -->
+    <a-assets>
+        <img id="base-texture" src="assets/textures/base-texture.jpg">
+        <img id="sabbiatura-texture" src="assets/textures/sabbiatura.png">
+        <img id="smaltatura-texture" src="assets/textures/smaltatura.png">
+    </a-assets>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Stato applicazione
+        const appState = {
+            sabbiatura: { active: false, intensity: 0.5 },
+            smaltatura: { active: false, intensity: 0.7 },
+            colore: { active: false, intensity: 0.4, value: '#FF0000' }
+        };
+
+        function toggleLayer(layerName) {
+            const btn = event.currentTarget;
+            const layer = document.getElementById(layerName + '-layer');
+            
+            appState[layerName].active = !appState[layerName].active;
+            btn.classList.toggle('active', appState[layerName].active);
+            
+            if (appState[layerName].active) {
+                layer.setAttribute('material', 'opacity', appState[layerName].intensity);
+            } else {
+                layer.setAttribute('material', 'opacity', 0);
+            }
+        }
+
+        function updateIntensity(layerName, value) {
+            appState[layerName].intensity = value / 100;
+            document.getElementById(layerName + '-value').textContent = value + '%';
+            
+            if (appState[layerName].active) {
+                const layer = document.getElementById(layerName + '-layer');
+                layer.setAttribute('material', 'opacity', appState[layerName].intensity);
+            }
+        }
+
+        function updateColor(color) {
+            appState.colore.value = color;
+            if (appState.colore.active) {
+                document.getElementById('colore-layer').setAttribute('material', 'color', color);
+            }
+        }
+
+        function saveConfiguration() {
+            const config = {
+                timestamp: new Date().toISOString(),
+                layers: appState
+            };
+            
+            // Simula salvataggio (puoi implementare download PDF)
+            alert('Configurazione salvata!\n' + JSON.stringify(config, null, 2));
+        }
+
+        function resetAll() {
+            // Reset stato
+            Object.keys(appState).forEach(layer => {
+                appState[layer].active = false;
+                appState[layer].intensity = layer === 'sabbiatura' ? 0.5 : 
+                                          layer === 'smaltatura' ? 0.7 : 0.4;
+            });
+            
+            // Reset UI
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Reset layers 3D
+            document.querySelectorAll('[id$="-layer"]').forEach(layer => {
+                layer.setAttribute('material', 'opacity', 0);
+            });
+            
+            // Reset sliders
+            document.querySelectorAll('.intensity-slider').forEach((slider, index) => {
+                const values = [50, 70, 40];
+                slider.value = values[index];
+            });
+            
+            alert('Configurazione resettata!');
+        }
+
+        // Rilevamento marker
+        document.addEventListener('markerFound', function() {
+            document.getElementById('instructions').textContent = '✅ Marker riconosciuto! Modifica la lastra qui sotto';
+        });
+
+        document.addEventListener('markerLost', function() {
+            document.getElementById('instructions').textContent = '📷 Inquadra il marker per vedere la lastra in AR';
+        });
+    </script>
+</body>
+</html>
