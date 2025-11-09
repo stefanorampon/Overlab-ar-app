@@ -1,25 +1,446 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
-    <title>OVERLAB TEST</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>OVERLAB - AR Configurator</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
-        body { margin: 0; }
-        .menu { position: fixed; top: 10px; left: 10px; background: white; padding: 10px; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: black;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .title {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .menu-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* Side Menu */
+        .menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 280px;
+            height: 100%;
+            background: white;
+            padding: 20px;
+            transition: right 0.3s ease;
+            z-index: 1001;
+            overflow-y: auto;
+        }
+        
+        .menu.active {
+            right: 0;
+        }
+        
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .menu-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Controls */
+        .control-group {
+            margin-bottom: 25px;
+        }
+        
+        .control-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .control-title span {
+            margin-right: 8px;
+        }
+        
+        .control-item {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .toggle-label {
+            font-weight: 500;
+        }
+        
+        .toggle {
+            width: 50px;
+            height: 28px;
+            background: #ddd;
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .toggle.active {
+            background: #007AFF;
+        }
+        
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+        
+        .toggle.active::after {
+            transform: translateX(22px);
+        }
+        
+        .slider-container {
+            margin-top: 10px;
+        }
+        
+        .slider-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+        }
+        
+        .color-picker {
+            width: 100%;
+            height: 40px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        /* Action Buttons */
+        .actions {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .save-btn {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .reset-btn {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        /* Instructions */
+        .instructions {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            z-index: 999;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .overlay.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
-    <a-scene embedded arjs>
+    <!-- Header -->
+    <div class="header">
+        <div class="title">OVERLAB</div>
+        <button class="menu-btn" onclick="toggleMenu()">⚙️</button>
+    </div>
+
+    <!-- AR Scene - SEMPLIFICATA -->
+    <a-scene embedded arjs="sourceType: webcam;">
+        <!-- Usa marker predefinito che funziona sempre -->
         <a-marker preset="hiro">
-            <a-box color="blue" position="0 0.5 0"></a-box>
+            <!-- Base -->
+            <a-plane id="base-layer" width="1" height="0.6" position="0 0 0" 
+                     material="color: #C4C4C4"></a-plane>
+            
+            <!-- Sabbiatura -->
+            <a-plane id="sabbiatura-layer" width="1" height="0.6" position="0 0 0.001" 
+                     material="color: #8B4513; transparent: true; opacity: 0"></a-plane>
+            
+            <!-- Smaltatura -->
+            <a-plane id="smaltatura-layer" width="1" height="0.6" position="0 0 0.002" 
+                     material="color: white; transparent: true; opacity: 0"></a-plane>
+            
+            <!-- Colore -->
+            <a-plane id="colore-layer" width="1" height="0.6" position="0 0 0.003" 
+                     material="color: red; transparent: true; opacity: 0"></a-plane>
         </a-marker>
         <a-entity camera></a-entity>
     </a-scene>
-    
-    <div class="menu">
-        <button onclick="alert('Funziona!')">TEST</button>
-        <p>Cerca "Hiro marker" su Google</p>
+
+    <!-- Instructions -->
+    <div class="instructions" id="instructions">
+        📷 Cerca online: "Hiro marker AR" e inquadralo
     </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <!-- Side Menu -->
+    <div class="menu" id="menu">
+        <div class="menu-header">
+            <div class="menu-title">Configura</div>
+            <button class="close-btn" onclick="toggleMenu()">✕</button>
+        </div>
+
+        <!-- Sabbiatura -->
+        <div class="control-group">
+            <div class="control-title">🔹 Sabbiatura</div>
+            <div class="control-item">
+                <div class="toggle-row">
+                    <div class="toggle-label">Attiva</div>
+                    <div class="toggle" id="sabbiatura-toggle" onclick="toggleLayer('sabbiatura')"></div>
+                </div>
+                <div class="slider-container">
+                    <div class="slider-info">
+                        <span>Intensità</span>
+                        <span id="sabbiatura-value">50%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value="50" class="slider" 
+                           oninput="updateIntensity('sabbiatura', this.value)">
+                </div>
+            </div>
+        </div>
+
+        <!-- Smaltatura -->
+        <div class="control-group">
+            <div class="control-title">✨ Smaltatura</div>
+            <div class="control-item">
+                <div class="toggle-row">
+                    <div class="toggle-label">Attiva</div>
+                    <div class="toggle" id="smaltatura-toggle" onclick="toggleLayer('smaltatura')"></div>
+                </div>
+                <div class="slider-container">
+                    <div class="slider-info">
+                        <span>Opacità</span>
+                        <span id="smaltatura-value">70%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value="70" class="slider" 
+                           oninput="updateIntensity('smaltatura', this.value)">
+                </div>
+            </div>
+        </div>
+
+        <!-- Colore -->
+        <div class="control-group">
+            <div class="control-title">🎨 Colore</div>
+            <div class="control-item">
+                <div class="toggle-row">
+                    <div class="toggle-label">Attiva</div>
+                    <div class="toggle" id="colore-toggle" onclick="toggleLayer('colore')"></div>
+                </div>
+                <div class="slider-container">
+                    <div class="slider-info">
+                        <span>Intensità</span>
+                        <span id="colore-value">40%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value="40" class="slider" 
+                           oninput="updateIntensity('colore', this.value)">
+                    <input type="color" class="color-picker" value="#FF0000" 
+                           onchange="updateColor(this.value)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="actions">
+        <button class="btn save-btn" onclick="saveConfig()">💾 Salva</button>
+        <button class="btn reset-btn" onclick="resetAll()">🔄 Reset</button>
+    </div>
+
+    <script>
+        // App state
+        const state = {
+            sabbiatura: { active: false, intensity: 0.5 },
+            smaltatura: { active: false, intensity: 0.7 },
+            colore: { active: false, intensity: 0.4, value: '#FF0000' }
+        };
+
+        // Menu functions
+        function toggleMenu() {
+            const menu = document.getElementById('menu');
+            const overlay = document.getElementById('overlay');
+            menu.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // Layer functions
+        function toggleLayer(layer) {
+            const toggle = document.getElementById(layer + '-toggle');
+            state[layer].active = !state[layer].active;
+            toggle.classList.toggle('active', state[layer].active);
+            
+            const element = document.getElementById(layer + '-layer');
+            if (state[layer].active) {
+                element.setAttribute('material', 'opacity', state[layer].intensity);
+            } else {
+                element.setAttribute('material', 'opacity', 0);
+            }
+        }
+
+        function updateIntensity(layer, value) {
+            state[layer].intensity = value / 100;
+            document.getElementById(layer + '-value').textContent = value + '%';
+            
+            if (state[layer].active) {
+                const element = document.getElementById(layer + '-layer');
+                element.setAttribute('material', 'opacity', state[layer].intensity);
+            }
+        }
+
+        function updateColor(color) {
+            state.colore.value = color;
+            if (state.colore.active) {
+                document.getElementById('colore-layer').setAttribute('material', 'color', color);
+            }
+        }
+
+        // Actions
+        function saveConfig() {
+            alert('Configurazione salvata!');
+            console.log('Config:', state);
+        }
+
+        function resetAll() {
+            // Reset state
+            Object.keys(state).forEach(layer => {
+                state[layer].active = false;
+                state[layer].intensity = layer === 'sabbiatura' ? 0.5 : 
+                                       layer === 'smaltatura' ? 0.7 : 0.4;
+            });
+            
+            // Reset UI
+            document.querySelectorAll('.toggle').forEach(toggle => {
+                toggle.classList.remove('active');
+            });
+            
+            // Reset 3D
+            document.querySelectorAll('[id$="-layer"]').forEach(layer => {
+                layer.setAttribute('material', 'opacity', 0);
+            });
+            
+            // Reset values
+            document.getElementById('sabbiatura-value').textContent = '50%';
+            document.getElementById('smaltatura-value').textContent = '70%';
+            document.getElementById('colore-value').textContent = '40%';
+            
+            alert('Reset completato!');
+        }
+
+        // Marker events
+        document.addEventListener('markerFound', function() {
+            document.getElementById('instructions').textContent = '✅ Marker riconosciuto!';
+        });
+
+        document.addEventListener('markerLost', function() {
+            document.getElementById('instructions').textContent = '📷 Cerca online: "Hiro marker AR" e inquadralo';
+        });
+
+        console.log('OVERLAB app loaded');
+    </script>
 </body>
 </html>
