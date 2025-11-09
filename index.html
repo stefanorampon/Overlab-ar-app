@@ -1,29 +1,176 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
-    <title>EUROSAB - TEST</title>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>EUROSAB AR</title>
+    
+    <!-- A-Frame con CDN affidabili -->
+    <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-ar@3.3.0/dist/aframe-ar.min.js"></script>
+    
     <style>
-        body { margin: 0; background: black; }
-        .info { position: fixed; top: 20px; left: 20px; background: white; padding: 15px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #000;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+        #camera-permission {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: 20px;
+            text-align: center;
+        }
+        #camera-permission.hidden {
+            display: none;
+        }
+        .permission-btn {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            margin: 20px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <a-scene embedded arjs="sourceType: webcam;">
-        <!-- MARKER HIRO SEMPLICE -->
-        <a-marker preset="hiro">
-            <a-box position="0 0.5 0" color="blue"></a-box>
-            <a-text value="EUROSAB" position="-0.3 1 0" color="black"></a-text>
+    <!-- Schermata permessi -->
+    <div id="camera-permission">
+        <h2>📷 Fotocamera Richiesta</h2>
+        <p>OVERLAB ha bisogno della fotocamera per la realtà aumentata</p>
+        <button class="permission-btn" onclick="startCamera()">Attiva Fotocamera</button>
+        <p style="margin-top: 20px; font-size: 14px; color: #ccc;">
+            Assicurati di aver dato i permessi fotocamera a Safari
+        </p>
+    </div>
+
+    <!-- Scena AR -->
+    <a-scene 
+        embedded 
+        arjs="sourceType: webcam; debugUIEnabled: false;"
+        vr-mode-ui="enabled: false"
+        renderer="colorManagement: true;"
+        style="width: 100%; height: 100%;"
+    >
+        <!-- Marker Hiro -->
+        <a-marker preset="hiro" emitevents="true">
+            <!-- Base -->
+            <a-plane position="0 0 0" width="1" height="0.6" color="#C4C4C4"></a-plane>
+            
+            <!-- Sabbiatura -->
+            <a-plane position="0 0 0.001" width="1" height="0.6" color="#8B4513" 
+                     opacity="0" id="sabbiatura-layer"></a-plane>
+            
+            <!-- Smaltatura -->
+            <a-plane position="0 0 0.002" width="1" height="0.6" color="#FFFFFF" 
+                     opacity="0" id="smaltatura-layer"></a-plane>
         </a-marker>
+
         <a-entity camera></a-entity>
     </a-scene>
-    
-    <div class="info">
-        <h3>📱 TEST MARKER HIRO</h3>
-        <p>Cerca su Google: "Hiro marker AR"</p>
-        <p>Inquadra l'immagine con il telefono</p>
-        <p>Dovresti vedere un cubo blu</p>
+
+    <!-- Controlli -->
+    <div style="position: fixed; bottom: 20px; left: 0; right: 0; text-align: center;">
+        <button onclick="toggleEffect('sabbiatura')" style="padding: 12px 20px; margin: 5px; background: #8B4513; color: white; border: none; border-radius: 8px;">
+            Sabbiatura
+        </button>
+        <button onclick="toggleEffect('smaltatura')" style="padding: 12px 20px; margin: 5px; background: #666; color: white; border: none; border-radius: 8px;">
+            Smaltatura
+        </button>
     </div>
+
+    <!-- Istruzioni -->
+    <div style="position: fixed; top: 20px; left: 0; right: 0; text-align: center; color: white; background: rgba(0,0,0,0.7); padding: 10px;">
+        <p id="instructions">🔍 Cerca "Hiro marker AR" su Google e inquadralo</p>
+    </div>
+
+    <script>
+        // Gestione permessi iOS
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    document.getElementById('camera-permission').classList.add('hidden');
+                    console.log('✅ Fotocamera attivata');
+                    
+                    // Avvia AR dopo un piccolo delay
+                    setTimeout(() => {
+                        const scene = document.querySelector('a-scene');
+                        if (scene.hasLoaded) {
+                            console.log('🔄 Scena AR caricata');
+                        }
+                    }, 1000);
+                })
+                .catch(function(error) {
+                    console.error('❌ Errore fotocamera:', error);
+                    document.getElementById('camera-permission').innerHTML = `
+                        <h2>❌ Permesso Negato</h2>
+                        <p>Vai in Impostazioni → Safari → Fotocamera → "Consenti"</p>
+                        <button class="permission-btn" onclick="location.reload()">Ricarica</button>
+                    `;
+                });
+        }
+
+        // Controlli effetti
+        function toggleEffect(layer) {
+            const element = document.getElementById(layer + '-layer');
+            const currentOpacity = element.getAttribute('opacity');
+            
+            if (currentOpacity === 0 || currentOpacity === '0') {
+                element.setAttribute('opacity', 0.7);
+            } else {
+                element.setAttribute('opacity', 0);
+            }
+        }
+
+        // Eventi marker
+        document.addEventListener('markerFound', function() {
+            document.getElementById('instructions').textContent = '✅ Marker riconosciuto!';
+        });
+
+        document.addEventListener('markerLost', function() {
+            document.getElementById('instructions').textContent = '🔍 Inquadra il marker Hiro';
+        });
+
+        // Inizializzazione
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📱 EUROSAB AR per iOS caricato');
+            
+            // Auto-start su alcuni dispositivi
+            if (!/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                startCamera();
+            }
+        });
+
+        // Fallback per problemi di loading
+        setTimeout(() => {
+            if (document.getElementById('camera-permission').style.display !== 'none') {
+                startCamera();
+            }
+        }, 2000);
+    </script>
 </body>
 </html>
