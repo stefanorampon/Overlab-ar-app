@@ -3,372 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EUROSAB - Simulatore</title>
+    <title>OVERLAB - Configuratore</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f0f0f0;
+            font-family: -apple-system, sans-serif;
+            background: white;
             height: 100vh;
-            overflow: hidden;
         }
-        
         .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-        
-        .preview-area {
-            flex: 1;
-            background: linear-gradient(45deg, #e0e0e0, #f5f5f5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .lastra-base {
-            width: 300px;
-            height: 180px;
-            background: #c4c4c4;
-            border-radius: 10px;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 10px;
-            pointer-events: none;
-        }
-        
-        #sabbiatura-overlay {
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(139, 69, 19, 0.6) 2px, transparent 2px),
-                radial-gradient(circle at 80% 80%, rgba(139, 69, 19, 0.4) 1px, transparent 1px);
-            background-size: 30px 30px;
-            opacity: 0;
-        }
-        
-        #smaltatura-overlay {
-            background: 
-                linear-gradient(45deg, 
-                    rgba(255,255,255,0.8) 0%, 
-                    rgba(255,255,255,0.4) 50%, 
-                    rgba(255,255,255,0.8) 100%);
-            opacity: 0;
-        }
-        
-        #colore-overlay {
-            background: #ff0000;
-            opacity: 0;
-            mix-blend-mode: multiply;
-        }
-        
-        .controls {
-            background: white;
+            max-width: 400px;
+            margin: 0 auto;
             padding: 20px;
-            border-radius: 20px 20px 0 0;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
         }
-        
-        .control-group {
-            margin-bottom: 20px;
-        }
-        
-        .control-title {
-            font-weight: 600;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .control-title span {
-            margin-right: 8px;
-        }
-        
-        .toggle-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .ios-toggle {
-            width: 51px;
-            height: 31px;
-            background: #e9ecef;
-            border-radius: 25px;
-            position: relative;
-            cursor: pointer;
-        }
-        
-        .ios-toggle.active {
-            background: #007AFF;
-        }
-        
-        .ios-toggle::after {
-            content: '';
-            position: absolute;
-            width: 27px;
-            height: 27px;
-            background: white;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-            transition: transform 0.3s ease;
-        }
-        
-        .ios-toggle.active::after {
-            transform: translateX(20px);
-        }
-        
-        .slider-container {
-            margin-top: 10px;
-        }
-        
-        .slider-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        
-        .ios-slider {
+        h1 { text-align: center; margin: 20px 0; }
+        .preview {
             width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: #e9ecef;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        
-        .ios-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #007AFF;
-            cursor: pointer;
-        }
-        
-        .color-picker {
-            width: 100%;
-            height: 40px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .action-btn {
-            flex: 1;
-            padding: 15px;
-            border: none;
+            height: 200px;
+            background: lightgray;
+            margin: 20px 0;
             border-radius: 10px;
+        }
+        .controls { margin: 20px 0; }
+        .control { margin: 15px 0; }
+        button { 
+            width: 100%; 
+            padding: 15px; 
+            margin: 5px 0; 
+            border: none;
+            border-radius: 8px;
             font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
         }
-        
-        .save-btn {
-            background: #4CAF50;
-            color: white;
-        }
-        
-        .reset-btn {
-            background: #ff6b6b;
-            color: white;
-        }
-        
-        .header {
-            background: white;
-            padding: 15px;
-            text-align: center;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .app-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #333;
-        }
+        .sabbiatura { background: brown; color: white; }
+        .smaltatura { background: white; color: black; border: 1px solid #ccc; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="app-title">EUROSAB - Simulatore Effetti</div>
-        </div>
+        <h1>OVERLAB</h1>
+        <div class="preview" id="preview"></div>
         
-        <!-- Area Anteprima -->
-        <div class="preview-area">
-            <div class="lastra-base">
-                <div class="overlay" id="sabbiatura-overlay"></div>
-                <div class="overlay" id="smaltatura-overlay"></div>
-                <div class="overlay" id="colore-overlay"></div>
-            </div>
-        </div>
-        
-        <!-- Controlli -->
         <div class="controls">
-            <!-- Sabbiatura -->
-            <div class="control-group">
-                <div class="control-title"><span>🔹</span> Sabbiatura</div>
-                <div class="toggle-row">
-                    <div>Effetto Sabbiatura</div>
-                    <div class="ios-toggle" id="sabbiatura-toggle" onclick="toggleLayer('sabbiatura')"></div>
-                </div>
-                <div class="slider-container">
-                    <div class="slider-info">
-                        <span>Intensità</span>
-                        <span id="sabbiatura-value">50%</span>
-                    </div>
-                    <input type="range" min="0" max="100" value="50" class="ios-slider" 
-                           oninput="updateIntensity('sabbiatura', this.value)">
-                </div>
-            </div>
-            
-            <!-- Smaltatura -->
-            <div class="control-group">
-                <div class="control-title"><span>✨</span> Smaltatura</div>
-                <div class="toggle-row">
-                    <div>Effetto Smaltatura</div>
-                    <div class="ios-toggle" id="smaltatura-toggle" onclick="toggleLayer('smaltatura')"></div>
-                </div>
-                <div class="slider-container">
-                    <div class="slider-info">
-                        <span>Opacità</span>
-                        <span id="smaltatura-value">70%</span>
-                    </div>
-                    <input type="range" min="0" max="100" value="70" class="ios-slider" 
-                           oninput="updateIntensity('smaltatura', this.value)">
-                </div>
-            </div>
-            
-            <!-- Colore -->
-            <div class="control-group">
-                <div class="control-title"><span>🎨</span> Colore</div>
-                <div class="toggle-row">
-                    <div>Colore Personalizzato</div>
-                    <div class="ios-toggle" id="colore-toggle" onclick="toggleLayer('colore')"></div>
-                </div>
-                <div class="slider-container">
-                    <div class="slider-info">
-                        <span>Intensità</span>
-                        <span id="colore-value">40%</span>
-                    </div>
-                    <input type="range" min="0" max="100" value="40" class="ios-slider" 
-                           oninput="updateIntensity('colore', this.value)">
-                    <input type="color" class="color-picker" value="#FF0000" 
-                           onchange="updateColor(this.value)">
-                </div>
-            </div>
-            
-            <!-- Azioni -->
-            <div class="action-buttons">
-                <button class="action-btn save-btn" onclick="saveConfiguration()">💾 Salva Configurazione</button>
-                <button class="action-btn reset-btn" onclick="resetAll()">🔄 Reset</button>
-            </div>
+            <button class="sabbiatura" onclick="applicaSabbiatura()">Applica Sabbiatura</button>
+            <button class="smaltatura" onclick="applicaSmaltatura()">Applica Smaltatura</button>
+            <button onclick="reset()" style="background: red; color: white;">Reset</button>
         </div>
     </div>
 
     <script>
-        // Stato applicazione
-        const appState = {
-            sabbiatura: { active: false, intensity: 0.5 },
-            smaltatura: { active: false, intensity: 0.7 },
-            colore: { active: false, intensity: 0.4, value: '#FF0000' }
-        };
-
-        // Toggle layer
-        function toggleLayer(layerName) {
-            const toggle = document.getElementById(layerName + '-toggle');
-            const overlay = document.getElementById(layerName + '-overlay');
-            
-            appState[layerName].active = !appState[layerName].active;
-            toggle.classList.toggle('active', appState[layerName].active);
-            
-            if (appState[layerName].active) {
-                overlay.style.opacity = appState[layerName].intensity;
-            } else {
-                overlay.style.opacity = 0;
-            }
+        function applicaSabbiatura() {
+            document.getElementById('preview').style.background = 
+                'repeating-linear-gradient(45deg, brown, brown 10px, #8B4513 10px, #8B4513 20px)';
         }
 
-        // Aggiorna intensità
-        function updateIntensity(layerName, value) {
-            appState[layerName].intensity = value / 100;
-            document.getElementById(layerName + '-value').textContent = value + '%';
-            
-            if (appState[layerName].active) {
-                document.getElementById(layerName + '-overlay').style.opacity = appState[layerName].intensity;
-            }
+        function applicaSmaltatura() {
+            document.getElementById('preview').style.background = 
+                'linear-gradient(135deg, rgba(255,255,255,0.8), rgba(200,200,200,0.9))';
         }
 
-        // Aggiorna colore
-        function updateColor(color) {
-            appState.colore.value = color;
-            document.getElementById('colore-overlay').style.backgroundColor = color;
+        function reset() {
+            document.getElementById('preview').style.background = 'lightgray';
         }
 
-        // Salva configurazione
-        function saveConfiguration() {
-            const config = {
-                timestamp: new Date().toLocaleString('it-IT'),
-                configuration: appState
-            };
-            
-            alert('✅ Configurazione salvata!\n\nPronta per la condivisione con il cliente.');
-            console.log('Configurazione salvata:', config);
-            
-            // Qui puoi aggiungere il download del PDF
-        }
-
-        // Reset tutto
-        function resetAll() {
-            // Reset stato
-            Object.keys(appState).forEach(layer => {
-                appState[layer].active = false;
-                appState[layer].intensity = layer === 'sabbiatura' ? 0.5 : 
-                                          layer === 'smaltatura' ? 0.7 : 0.4;
-            });
-            
-            // Reset UI
-            document.querySelectorAll('.ios-toggle').forEach(toggle => {
-                toggle.classList.remove('active');
-            });
-            
-            document.querySelectorAll('.overlay').forEach(overlay => {
-                overlay.style.opacity = 0;
-            });
-            
-            // Reset valori display
-            document.getElementById('sabbiatura-value').textContent = '50%';
-            document.getElementById('smaltatura-value').textContent = '70%';
-            document.getElementById('colore-value').textContent = '40%';
-            document.querySelector('.color-picker').value = '#FF0000';
-            document.getElementById('colore-overlay').style.backgroundColor = '#FF0000';
-            
-            alert('🔄 Configurazione resettata!');
-        }
-
-        // Inizializzazione
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 EUROSAB Simulator loaded');
-        });
+        console.log('✅ OVERLOAD semplice caricato');
     </script>
 </body>
 </html>
