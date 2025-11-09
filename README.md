@@ -1,31 +1,33 @@
-# 🏢 EUROSAB SRL - Configuratore AR Lastre
+# 🎯 OVERLAB - Configuratore AR per Personalizzazione Lastre
 
 <div align="center">
 
-![EUROSAB AR App](https://img.shields.io/badge/Overlab-ar%20Configurator-blue)
+![OVERLAB AR App](https://img.shields.io/badge/OVERLAB-AR%20Configurator-blue)
 ![Version](https://img.shields.io/badge/version-1.0.0-green)
 ![License](https://img.shields.io/badge/license-MIT-yellow)
+![AR Ready](https://img.shields.io/badge/AR-Ready-orange)
 
-**App di Realtà Aumentata per personalizzazione lastre in gres porcellanato**
+**Piattaforma di Realtà Aumentata per visualizzare effetti su superfici**
 
-[🚀 Live Demo](#) • [📱 Come Usare](#-come-usare) • [🛠️ Setup](#️-setup-sviluppatore)
+[🚀 Live Demo](#) • [📱 Come Usare](#-come-usare) • [🛠️ Developer](#-developer)
 
 </div>
 
-## 📖 Descrizione
+## 📖 Cos'è OVERLAB?
 
-**Overlab ar Configurator** è un'applicazione web di Realtà Aumentata che permette di visualizzare in tempo reale gli effetti di personalizzazione su lastre di gres porcellanato direttamente tramite fotocamera smartphone.
+**OVERLAB** è un'applicazione web innovativa di Realtà Aumentata che permette di visualizzare in tempo reale effetti di personalizzazione su lastre e superfici direttamente tramite fotocamera smartphone.
 
-### 🎯 Funzionalità Principali
+### 🎯 Funzionalità Core
 
-- **🎨 Configurazione in AR**: Visualizza le lastre in realtà aumentata
-- **⚡ Layer Interattivi**: Attiva/disattiva effetti in tempo reale
-- **📸 Fotocamera Live**: Usa la fotocamera del dispositivo
-- **💾 Salva Configurazioni**: Memorizza le combinazioni preferite
-- **📱 Multi-piattaforma**: Funziona su tutti gli smartphone moderni
+- **🔍 Rilevamento AR**: Riconoscimento superfici in tempo reale
+- **🎨 Layer Dinamici**: Attiva/disattiva effetti con overlay visivi
+- **📸 Realtà Aumentata**: Visualizza direttamente su fotocamera live
+- **⚡ Controlli Real-time**: Regola intensità e opacità
+- **💾 Export Configurazioni**: Salva e condividi le personalizzazioni
+- **📱 Cross-Platform**: Funziona su iOS, Android, desktop
 
-## 🚀 Come Usare
+## 🚀 Come Usare OVERLAB
 
-### Per gli Utenti Finali
+### Per Clienti & Utenti Finali
 
-1. **Apri l'App**
+1. **Apri OVERLAB**
