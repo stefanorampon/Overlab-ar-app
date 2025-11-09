@@ -251,23 +251,44 @@
     <!-- AR Scene - SEMPLIFICATA -->
     <a-scene embedded arjs="sourceType: webcam;">
         <!-- Usa marker predefinito che funziona sempre -->
-        <a-marker preset="hiro">
-            <!-- Base -->
-            <a-plane id="base-layer" width="1" height="0.6" position="0 0 0" 
-                     material="color: #C4C4C4"></a-plane>
-            
-            <!-- Sabbiatura -->
-            <a-plane id="sabbiatura-layer" width="1" height="0.6" position="0 0 0.001" 
-                     material="color: #8B4513; transparent: true; opacity: 0"></a-plane>
-            
-            <!-- Smaltatura -->
-            <a-plane id="smaltatura-layer" width="1" height="0.6" position="0 0 0.002" 
-                     material="color: white; transparent: true; opacity: 0"></a-plane>
-            
-            <!-- Colore -->
-            <a-plane id="colore-layer" width="1" height="0.6" position="0 0 0.003" 
-                     material="color: red; transparent: true; opacity: 0"></a-plane>
-        </a-marker>
+         <a-assets>
+        <img id="target-image" src="assets/targets/lastra-target.jpg">
+        <img id="sabbiatura-texture" src="assets/textures/sabbiatura.png">
+        <img id="smaltatura-texture" src="assets/textures/smaltatura.png">
+    </a-assets>
+
+    <!-- Target Image Marker -->
+    <a-marker type="pattern" url="assets/markers/lastra-target.patt" emitevents="true">
+        
+        <!-- Base Lastra -->
+        <a-plane id="base-layer" 
+                 width="1.0" height="0.6" 
+                 position="0 0 0"
+                 material="color: #C4C4C4">
+        </a-plane>
+        
+        <!-- Layer Sabbiatura -->
+        <a-plane id="sabbiatura-layer"
+                 width="1.0" height="0.6" 
+                 position="0 0 0.001"
+                 material="src: #sabbiatura-texture; transparent: true; opacity: 0">
+        </a-plane>
+        
+        <!-- Layer Smaltatura -->
+        <a-plane id="smaltatura-layer"
+                 width="1.0" height="0.6" 
+                 position="0 0 0.002"
+                 material="src: #smaltatura-texture; transparent: true; opacity: 0">
+        </a-plane>
+        
+        <!-- Layer Colore -->
+        <a-plane id="colore-layer"
+                 width="1.0" height="0.6" 
+                 position="0 0 0.003"
+                 material="shader: flat; color: #FF0000; transparent: true; opacity: 0">
+        </a-plane>
+        
+    </a-marker>
         <a-entity camera></a-entity>
     </a-scene>
 
