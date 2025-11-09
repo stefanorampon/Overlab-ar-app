@@ -1,30 +1,17 @@
 
-2. **Permetti l'accesso alla fotocamera** 📷
+2. **Autorizza fotocamera** 📷
+*(Necessario per la realtà aumentata)*
 
-3. **Inquadra il marker OL**
-![Marker](assets/markers/marker-visual.png)
+3. **Inquadra una superficie piana** o usa il marker dedicato
+![Marker OVERLAB](assets/markers/overlab-marker.png)
 
-4. **Personalizza la lastra**:
-- 🔹 **Sabbiatura**: Intensità regolabile 0-100%
-- ✨ **Smaltatura**: Opacità personalizzabile
-- 🎨 **Colore**: Scegli tra tutta la palette
+4. **Personalizza con i layer**:
 
-### 🎮 Controlli
+| Layer | Effetto | Controllo |
+|-------|---------|-----------|
+| **🔹 Sabbiatura** | Texture granulare | Intensità 0-100% |
+| **✨ Smaltatura** | Finitura lucida | Opacità regolabile |
+| **🎨 Colore** | Tonalità personalizzata | Picker completo RGB |
+| **🔧 Texture** | Effetti speciali | Multiple opzioni |
 
-| Pulsante | Funzione |
-|----------|----------|
-| 🔹 Sabbiatura | Effetto texture sabbiatura |
-| ✨ Smaltatura | Finitura lucida/smaltata |
-| 🎨 Colore | Personalizzazione colore |
-| 💾 Salva | Salva configurazione |
-| 🔄 Reset | Ripristina impostazioni |
-
-## 🛠️ Setup Sviluppatore
-
-### Requisiti Tecnici
-
-- **Browser**: Chrome, Safari, Firefox (ultime versioni)
-- **Dispositivo**: Smartphone con fotocamera
-- **Connessione**: Internet per il primo caricamento
-
-### Struttura Progetto
+### 🎮 Interface Overview
