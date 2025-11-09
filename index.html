@@ -2,175 +2,373 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>EUROSAB AR</title>
-    
-    <!-- A-Frame con CDN affidabili -->
-    <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-ar@3.3.0/dist/aframe-ar.min.js"></script>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EUROSAB - Simulatore</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            background: #000;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            width: 100vw;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f0f0f0;
             height: 100vh;
-        }
-        html {
-            height: 100%;
             overflow: hidden;
         }
-        #camera-permission {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #000;
-            color: white;
+        
+        .container {
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            height: 100vh;
+        }
+        
+        .preview-area {
+            flex: 1;
+            background: linear-gradient(45deg, #e0e0e0, #f5f5f5);
+            display: flex;
             align-items: center;
-            z-index: 10000;
-            padding: 20px;
-            text-align: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
         }
-        #camera-permission.hidden {
-            display: none;
-        }
-        .permission-btn {
-            background: #007AFF;
-            color: white;
-            border: none;
-            padding: 15px 30px;
+        
+        .lastra-base {
+            width: 300px;
+            height: 180px;
+            background: #c4c4c4;
             border-radius: 10px;
-            font-size: 18px;
-            margin: 20px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            pointer-events: none;
+        }
+        
+        #sabbiatura-overlay {
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(139, 69, 19, 0.6) 2px, transparent 2px),
+                radial-gradient(circle at 80% 80%, rgba(139, 69, 19, 0.4) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0;
+        }
+        
+        #smaltatura-overlay {
+            background: 
+                linear-gradient(45deg, 
+                    rgba(255,255,255,0.8) 0%, 
+                    rgba(255,255,255,0.4) 50%, 
+                    rgba(255,255,255,0.8) 100%);
+            opacity: 0;
+        }
+        
+        #colore-overlay {
+            background: #ff0000;
+            opacity: 0;
+            mix-blend-mode: multiply;
+        }
+        
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .control-title span {
+            margin-right: 8px;
+        }
+        
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .ios-toggle {
+            width: 51px;
+            height: 31px;
+            background: #e9ecef;
+            border-radius: 25px;
+            position: relative;
             cursor: pointer;
+        }
+        
+        .ios-toggle.active {
+            background: #007AFF;
+        }
+        
+        .ios-toggle::after {
+            content: '';
+            position: absolute;
+            width: 27px;
+            height: 27px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+        }
+        
+        .ios-toggle.active::after {
+            transform: translateX(20px);
+        }
+        
+        .slider-container {
+            margin-top: 10px;
+        }
+        
+        .slider-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .ios-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e9ecef;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .ios-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #007AFF;
+            cursor: pointer;
+        }
+        
+        .color-picker {
+            width: 100%;
+            height: 40px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .save-btn {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .reset-btn {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .header {
+            background: white;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .app-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
         }
     </style>
 </head>
 <body>
-    <!-- Schermata permessi -->
-    <div id="camera-permission">
-        <h2>📷 Fotocamera Richiesta</h2>
-        <p>OVERLAB ha bisogno della fotocamera per la realtà aumentata</p>
-        <button class="permission-btn" onclick="startCamera()">Attiva Fotocamera</button>
-        <p style="margin-top: 20px; font-size: 14px; color: #ccc;">
-            Assicurati di aver dato i permessi fotocamera a Safari
-        </p>
-    </div>
-
-    <!-- Scena AR -->
-    <a-scene 
-        embedded 
-        arjs="sourceType: webcam; debugUIEnabled: false;"
-        vr-mode-ui="enabled: false"
-        renderer="colorManagement: true;"
-        style="width: 100%; height: 100%;"
-    >
-        <!-- Marker Hiro -->
-        <a-marker preset="hiro" emitevents="true">
-            <!-- Base -->
-            <a-plane position="0 0 0" width="1" height="0.6" color="#C4C4C4"></a-plane>
-            
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="app-title">EUROSAB - Simulatore Effetti</div>
+        </div>
+        
+        <!-- Area Anteprima -->
+        <div class="preview-area">
+            <div class="lastra-base">
+                <div class="overlay" id="sabbiatura-overlay"></div>
+                <div class="overlay" id="smaltatura-overlay"></div>
+                <div class="overlay" id="colore-overlay"></div>
+            </div>
+        </div>
+        
+        <!-- Controlli -->
+        <div class="controls">
             <!-- Sabbiatura -->
-            <a-plane position="0 0 0.001" width="1" height="0.6" color="#8B4513" 
-                     opacity="0" id="sabbiatura-layer"></a-plane>
+            <div class="control-group">
+                <div class="control-title"><span>🔹</span> Sabbiatura</div>
+                <div class="toggle-row">
+                    <div>Effetto Sabbiatura</div>
+                    <div class="ios-toggle" id="sabbiatura-toggle" onclick="toggleLayer('sabbiatura')"></div>
+                </div>
+                <div class="slider-container">
+                    <div class="slider-info">
+                        <span>Intensità</span>
+                        <span id="sabbiatura-value">50%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value="50" class="ios-slider" 
+                           oninput="updateIntensity('sabbiatura', this.value)">
+                </div>
+            </div>
             
             <!-- Smaltatura -->
-            <a-plane position="0 0 0.002" width="1" height="0.6" color="#FFFFFF" 
-                     opacity="0" id="smaltatura-layer"></a-plane>
-        </a-marker>
-
-        <a-entity camera></a-entity>
-    </a-scene>
-
-    <!-- Controlli -->
-    <div style="position: fixed; bottom: 20px; left: 0; right: 0; text-align: center;">
-        <button onclick="toggleEffect('sabbiatura')" style="padding: 12px 20px; margin: 5px; background: #8B4513; color: white; border: none; border-radius: 8px;">
-            Sabbiatura
-        </button>
-        <button onclick="toggleEffect('smaltatura')" style="padding: 12px 20px; margin: 5px; background: #666; color: white; border: none; border-radius: 8px;">
-            Smaltatura
-        </button>
-    </div>
-
-    <!-- Istruzioni -->
-    <div style="position: fixed; top: 20px; left: 0; right: 0; text-align: center; color: white; background: rgba(0,0,0,0.7); padding: 10px;">
-        <p id="instructions">🔍 Cerca "Hiro marker AR" su Google e inquadralo</p>
+            <div class="control-group">
+                <div class="control-title"><span>✨</span> Smaltatura</div>
+                <div class="toggle-row">
+                    <div>Effetto Smaltatura</div>
+                    <div class="ios-toggle" id="smaltatura-toggle" onclick="toggleLayer('smaltatura')"></div>
+                </div>
+                <div class="slider-container">
+                    <div class="slider-info">
+                        <span>Opacità</span>
+                        <span id="smaltatura-value">70%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value="70" class="ios-slider" 
+                           oninput="updateIntensity('smaltatura', this.value)">
+                </div>
+            </div>
+            
+            <!-- Colore -->
+            <div class="control-group">
+                <div class="control-title"><span>🎨</span> Colore</div>
+                <div class="toggle-row">
+                    <div>Colore Personalizzato</div>
+                    <div class="ios-toggle" id="colore-toggle" onclick="toggleLayer('colore')"></div>
+                </div>
+                <div class="slider-container">
+                    <div class="slider-info">
+                        <span>Intensità</span>
+                        <span id="colore-value">40%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value="40" class="ios-slider" 
+                           oninput="updateIntensity('colore', this.value)">
+                    <input type="color" class="color-picker" value="#FF0000" 
+                           onchange="updateColor(this.value)">
+                </div>
+            </div>
+            
+            <!-- Azioni -->
+            <div class="action-buttons">
+                <button class="action-btn save-btn" onclick="saveConfiguration()">💾 Salva Configurazione</button>
+                <button class="action-btn reset-btn" onclick="resetAll()">🔄 Reset</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Gestione permessi iOS
-        function startCamera() {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function(stream) {
-                    document.getElementById('camera-permission').classList.add('hidden');
-                    console.log('✅ Fotocamera attivata');
-                    
-                    // Avvia AR dopo un piccolo delay
-                    setTimeout(() => {
-                        const scene = document.querySelector('a-scene');
-                        if (scene.hasLoaded) {
-                            console.log('🔄 Scena AR caricata');
-                        }
-                    }, 1000);
-                })
-                .catch(function(error) {
-                    console.error('❌ Errore fotocamera:', error);
-                    document.getElementById('camera-permission').innerHTML = `
-                        <h2>❌ Permesso Negato</h2>
-                        <p>Vai in Impostazioni → Safari → Fotocamera → "Consenti"</p>
-                        <button class="permission-btn" onclick="location.reload()">Ricarica</button>
-                    `;
-                });
-        }
+        // Stato applicazione
+        const appState = {
+            sabbiatura: { active: false, intensity: 0.5 },
+            smaltatura: { active: false, intensity: 0.7 },
+            colore: { active: false, intensity: 0.4, value: '#FF0000' }
+        };
 
-        // Controlli effetti
-        function toggleEffect(layer) {
-            const element = document.getElementById(layer + '-layer');
-            const currentOpacity = element.getAttribute('opacity');
+        // Toggle layer
+        function toggleLayer(layerName) {
+            const toggle = document.getElementById(layerName + '-toggle');
+            const overlay = document.getElementById(layerName + '-overlay');
             
-            if (currentOpacity === 0 || currentOpacity === '0') {
-                element.setAttribute('opacity', 0.7);
+            appState[layerName].active = !appState[layerName].active;
+            toggle.classList.toggle('active', appState[layerName].active);
+            
+            if (appState[layerName].active) {
+                overlay.style.opacity = appState[layerName].intensity;
             } else {
-                element.setAttribute('opacity', 0);
+                overlay.style.opacity = 0;
             }
         }
 
-        // Eventi marker
-        document.addEventListener('markerFound', function() {
-            document.getElementById('instructions').textContent = '✅ Marker riconosciuto!';
-        });
+        // Aggiorna intensità
+        function updateIntensity(layerName, value) {
+            appState[layerName].intensity = value / 100;
+            document.getElementById(layerName + '-value').textContent = value + '%';
+            
+            if (appState[layerName].active) {
+                document.getElementById(layerName + '-overlay').style.opacity = appState[layerName].intensity;
+            }
+        }
 
-        document.addEventListener('markerLost', function() {
-            document.getElementById('instructions').textContent = '🔍 Inquadra il marker Hiro';
-        });
+        // Aggiorna colore
+        function updateColor(color) {
+            appState.colore.value = color;
+            document.getElementById('colore-overlay').style.backgroundColor = color;
+        }
+
+        // Salva configurazione
+        function saveConfiguration() {
+            const config = {
+                timestamp: new Date().toLocaleString('it-IT'),
+                configuration: appState
+            };
+            
+            alert('✅ Configurazione salvata!\n\nPronta per la condivisione con il cliente.');
+            console.log('Configurazione salvata:', config);
+            
+            // Qui puoi aggiungere il download del PDF
+        }
+
+        // Reset tutto
+        function resetAll() {
+            // Reset stato
+            Object.keys(appState).forEach(layer => {
+                appState[layer].active = false;
+                appState[layer].intensity = layer === 'sabbiatura' ? 0.5 : 
+                                          layer === 'smaltatura' ? 0.7 : 0.4;
+            });
+            
+            // Reset UI
+            document.querySelectorAll('.ios-toggle').forEach(toggle => {
+                toggle.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.overlay').forEach(overlay => {
+                overlay.style.opacity = 0;
+            });
+            
+            // Reset valori display
+            document.getElementById('sabbiatura-value').textContent = '50%';
+            document.getElementById('smaltatura-value').textContent = '70%';
+            document.getElementById('colore-value').textContent = '40%';
+            document.querySelector('.color-picker').value = '#FF0000';
+            document.getElementById('colore-overlay').style.backgroundColor = '#FF0000';
+            
+            alert('🔄 Configurazione resettata!');
+        }
 
         // Inizializzazione
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('📱 EUROSAB AR per iOS caricato');
-            
-            // Auto-start su alcuni dispositivi
-            if (!/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-                startCamera();
-            }
+            console.log('🚀 EUROSAB Simulator loaded');
         });
-
-        // Fallback per problemi di loading
-        setTimeout(() => {
-            if (document.getElementById('camera-permission').style.display !== 'none') {
-                startCamera();
-            }
-        }, 2000);
     </script>
 </body>
 </html>
