@@ -1,0 +1,30 @@
+
+2. **Permetti l'accesso alla fotocamera** 📷
+
+3. **Inquadra il marker OL**
+![Marker](assets/markers/marker-visual.png)
+
+4. **Personalizza la lastra**:
+- 🔹 **Sabbiatura**: Intensità regolabile 0-100%
+- ✨ **Smaltatura**: Opacità personalizzabile
+- 🎨 **Colore**: Scegli tra tutta la palette
+
+### 🎮 Controlli
+
+| Pulsante | Funzione |
+|----------|----------|
+| 🔹 Sabbiatura | Effetto texture sabbiatura |
+| ✨ Smaltatura | Finitura lucida/smaltata |
+| 🎨 Colore | Personalizzazione colore |
+| 💾 Salva | Salva configurazione |
+| 🔄 Reset | Ripristina impostazioni |
+
+## 🛠️ Setup Sviluppatore
+
+### Requisiti Tecnici
+
+- **Browser**: Chrome, Safari, Firefox (ultime versioni)
+- **Dispositivo**: Smartphone con fotocamera
+- **Connessione**: Internet per il primo caricamento
+
+### Struttura Progetto
